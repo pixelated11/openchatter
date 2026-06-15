@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>OpenChatter</title>
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div id="sidebar-top">
+                <button id="new-chat-btn" title="New Chat">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    New Chat
+                </button>
+            </div>
+            <div id="sidebar-section-label">Recent</div>
+            <div id="chat-list"></div>
+        </aside>
+
+        <!-- Main -->
+        <div id="main">
+            <nav class="topbar">
+                <h3 class="icon">OpenChatter</h3>
+            </nav>
+            <div id="content">
+                <div id="messages"></div>
+                <div class="prompt">
+                    <div class="prompt-container">
+                        <textarea
+                            id="ai-prompt"
+                            class="ai-prompt"
+                            placeholder="Enter prompt..."
+                            rows="1">
+                        </textarea>
+                        <button class="send-btn" id="send-btn">↑</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

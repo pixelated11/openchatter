@@ -1,0 +1,43 @@
+{
+  "name": "openchatter",
+  "version": "1.0.0",
+  "description": "Desktop client to chat with any model, from OpenAI-API format compatible LLM provider.",
+  "license": "MPL-2.0",
+  "author": {
+    "name": "pixelated11"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build-win": "electron-builder --windows",
+    "build-linux": "electron-builder --linux",
+    "build-all": "electron-builder --windows --linux"
+  },
+  "dependencies": {
+    "marked": "^9.1.6",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.pixelated11.openchatter",
+    "files": [
+      "**/*",
+      "!node_modules/.cache"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage",
+        "pacman"
+      ],
+      "icon": "assets/icon.png"
+    }
+  }
+}
