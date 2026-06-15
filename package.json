@@ -4,7 +4,8 @@
   "description": "Desktop client to chat with any model, from OpenAI-API format compatible LLM provider.",
   "license": "MPL-2.0",
   "author": {
-    "name": "pixelated11"
+    "name": "pixelated11",
+    "email": "itspixelatd@proton.me"
   },
   "main": "index.js",
   "scripts": {
