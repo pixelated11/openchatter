@@ -8,9 +8,9 @@ function ensureConfig() {
     const configPath = path.join(app.getPath('userData'), 'config.json');
     if (!fs.existsSync(configPath)) {
         const defaults = {
-            apiKey: '',
-            baseURL: 'https://api.openai.com/v1',
-            model: 'gpt-4o'
+            apiKey: 'YOUR_API_KEY',
+            baseURL: 'API_ENDPOINT',
+            model: 'PREFERED_MODEL'
         };
         fs.writeFileSync(configPath, JSON.stringify(defaults, null, 2));
     }
