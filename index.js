@@ -44,6 +44,8 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            backgroundThrottling: true,
+            spellcheck: false
         },
     });
 
@@ -63,7 +65,8 @@ ipcMain.handle('save-sessions', (event, data) => {
     fs.writeFileSync(sessionsPath, JSON.stringify(data, null, 2));
     return true;
 });
-
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=128'); // limit JS heap to 128MB, to reduce memory usage
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.whenReady().then(() => {
     ensureConfig();
     ensureSessions();
