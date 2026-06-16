@@ -34,7 +34,7 @@ async function loadConfig() {
         baseURL: config.baseURL,
         dangerouslyAllowBrowser: true,
         defaultHeaders: {
-            'HTTP-Referer': 'https://openchatter.app',
+            'HTTP-Referer': 'https://github.com/pixelated11/openchatter',
             'X-Title': 'OpenChatter',
         }
     });
@@ -211,4 +211,4 @@ async function init() {
     await loadSessions();
 }
 
-init();
+init(); // it's hard, innit?
