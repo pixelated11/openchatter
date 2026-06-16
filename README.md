@@ -4,6 +4,9 @@ OpenChatter is a simple, desktop application built on electron, used to chat mod
 - Active internet connection
 
 ## Getting started
+> [!NOTE] For users installing .pacman file
+> It currently depends on `http-parser`, which you can only get using an AUR helper. please do
+> install the dependency first before doing `pacman -U`.
 First, either download a prebuilt binary from the releases page, or build it yourself.
 ### Configuring the API key, endpoint and model
 To start using the application, you must first set up your API key, your API provider's endpoint, and your prefered model. To do this, 
