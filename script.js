@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 const { ipcRenderer } = require('electron');
 const { marked } = require('marked');
 const fs = require('fs');
+const path = require('path');
 
 // ── State ──
 const messages = [];
@@ -11,13 +12,19 @@ let client;
 let sessionsData = { nextId: 1, sessions: [] };
 let sessionsPath = '';
 let currentSessionId = null;
+let pendingFile = null; // { path, name, mimeType, base64 }
 
 // ── DOM ──
-const textarea    = document.getElementById('ai-prompt');
-const sendBtn     = document.getElementById('send-btn');
-const messagesEl  = document.getElementById('messages');
-const newChatBtn  = document.getElementById('new-chat-btn');
-const chatList    = document.getElementById('chat-list');
+const textarea      = document.getElementById('ai-prompt');
+const sendBtn       = document.getElementById('send-btn');
+const messagesEl    = document.getElementById('messages');
+const newChatBtn    = document.getElementById('new-chat-btn');
+const chatList      = document.getElementById('chat-list');
+const attachBtn     = document.getElementById('attach-btn');
+const fileInput     = document.getElementById('file-input');
+const filePreview   = document.getElementById('file-preview');
+const fileNameEl    = document.getElementById('file-name');
+const fileRemoveBtn = document.getElementById('file-remove-btn');
 
 // ── Config ──
 async function loadConfig() {
@@ -58,7 +65,6 @@ function saveSessions() {
 
 function renderChatList() {
     chatList.innerHTML = '';
-    // Show newest first
     const sorted = [...sessionsData.sessions].reverse();
     for (const session of sorted) {
         const item = document.createElement('div');
@@ -85,7 +91,10 @@ function loadSession(id) {
 
     messagesEl.innerHTML = '';
     for (const msg of session.messages) {
-        appendMessage(msg.role, msg.content);
+        const text = typeof msg.content === 'string'
+            ? msg.content
+            : msg.content.find(c => c.type === 'text')?.text || '';
+        appendMessage(msg.role, text);
     }
 
     renderChatList();
@@ -113,13 +122,53 @@ function updateCurrentSession() {
     }
 }
 
-// ── New chat button ──
+// ── File handling ──
+const MIME_TYPES = {
+    '.pdf':  'application/pdf',
+    '.png':  'image/png',
+    '.jpg':  'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+    '.gif':  'image/gif',
+};
+
+attachBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const ext = path.extname(file.name).toLowerCase();
+    const mimeType = MIME_TYPES[ext];
+    if (!mimeType) {
+        alert(`Unsupported file type: ${ext}\nSupported: PDF, PNG, JPG, WEBP, GIF`);
+        fileInput.value = '';
+        return;
+    }
+
+    const base64 = fs.readFileSync(file.path).toString('base64');
+    pendingFile = { name: file.name, mimeType, base64, isImage: mimeType.startsWith('image/') };
+
+    fileNameEl.textContent = file.name;
+    filePreview.classList.remove('hidden');
+    fileInput.value = '';
+});
+
+fileRemoveBtn.addEventListener('click', () => {
+    pendingFile = null;
+    filePreview.classList.add('hidden');
+    fileNameEl.textContent = '';
+});
+
+// ── New chat ──
 newChatBtn.addEventListener('click', () => {
     currentSessionId = null;
     messages.length = 0;
     messagesEl.innerHTML = '';
     textarea.value = '';
     textarea.style.height = 'auto';
+    pendingFile = null;
+    filePreview.classList.add('hidden');
     renderChatList();
 });
 
@@ -142,11 +191,16 @@ sendBtn.addEventListener('click', () => {
 });
 
 // ── Append bubble ──
-function appendMessage(role, text = '') {
+function appendMessage(role, text = '', fileName = null) {
     const el = document.createElement('div');
     if (role === 'user') {
         el.className = 'msg-user';
-        el.textContent = text; // plain text for user, no markdown
+        if (fileName) {
+            el.innerHTML = `<div class="msg-file-tag">📎 ${fileName}</div><span></span>`;
+            el.querySelector('span').textContent = text;
+        } else {
+            el.textContent = text;
+        }
     } else {
         el.className = 'msg-assistant';
         el.innerHTML = `<div class="label">OpenChatter</div><div class="body"></div>`;
@@ -159,19 +213,47 @@ function appendMessage(role, text = '') {
 
 // ── Send message ──
 async function sendMessage() {
-    const content = textarea.value.trim();
-    if (!content) return;
+    const text = textarea.value.trim();
+    if (!text && !pendingFile) return;
 
-    // Create session on first message
     if (currentSessionId === null) {
-        createNewSession(content);
+        createNewSession(text || pendingFile.name);
+    }
+
+    // Build content array
+    let content;
+    const file = pendingFile;
+
+    if (file) {
+        if (file.isImage) {
+            content = [
+                {
+                    type: 'image_url',
+                    image_url: { url: `data:${file.mimeType};base64,${file.base64}` }
+                },
+                { type: 'text', text: text || 'What is in this image?' }
+            ];
+        } else {
+            // PDF and other docs
+            content = [
+                {
+                    type: 'text',
+                    text: `[Attached file: ${file.name}]\n\n` + text
+                }
+            ];
+        }
+    } else {
+        content = text;
     }
 
     messages.push({ role: 'user', content });
-    appendMessage('user', content);
+    appendMessage('user', text || '', file?.name);
 
+    // Clear input
     textarea.value = '';
     textarea.style.height = 'auto';
+    pendingFile = null;
+    filePreview.classList.add('hidden');
     sendBtn.disabled = true;
     isStreaming = true;
 
@@ -189,7 +271,7 @@ async function sendMessage() {
         for await (const chunk of stream) {
             const delta = chunk.choices[0]?.delta?.content || '';
             fullReply += delta;
-            body.innerHTML = marked.parse(fullReply); // parse on every chunk
+            body.innerHTML = marked.parse(fullReply);
             messagesEl.scrollTop = messagesEl.scrollHeight;
         }
 
@@ -211,4 +293,4 @@ async function init() {
     await loadSessions();
 }
 
-init(); // it's hard, innit?
+init();

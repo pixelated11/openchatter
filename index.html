@@ -31,13 +31,27 @@
                 <div id="messages"></div>
                 <div class="prompt">
                     <div class="prompt-container">
-                        <textarea
-                            id="ai-prompt"
-                            class="ai-prompt"
-                            placeholder="Enter prompt..."
-                            rows="1">
-                        </textarea>
-                        <button class="send-btn" id="send-btn">↑</button>
+                        <!-- File preview -->
+                        <div id="file-preview" class="file-preview hidden">
+                            <span id="file-name"></span>
+                            <button id="file-remove-btn" title="Remove file">✕</button>
+                        </div>
+                        <div class="prompt-input-row">
+                            <!-- File attach button -->
+                            <button id="attach-btn" title="Attach file">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <path d="M13.5 7.5L7.5 13.5C6.1 14.9 3.9 14.9 2.5 13.5C1.1 12.1 1.1 9.9 2.5 8.5L8.5 2.5C9.4 1.6 10.9 1.6 11.8 2.5C12.7 3.4 12.7 4.9 11.8 5.8L5.8 11.8C5.4 12.2 4.6 12.2 4.2 11.8C3.8 11.4 3.8 10.6 4.2 10.2L9.5 4.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                            <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" hidden />
+                            <textarea
+                                id="ai-prompt"
+                                class="ai-prompt"
+                                placeholder="Enter prompt..."
+                                rows="1">
+                            </textarea>
+                            <button class="send-btn" id="send-btn">↑</button>
+                        </div>
                     </div>
                 </div>
             </div>
